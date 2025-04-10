@@ -1,0 +1,19 @@
+# Node.js
+node_modules/
+dist/
+.env
+
+# Prisma
+.prisma/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS/macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
