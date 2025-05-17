@@ -27,7 +27,7 @@ class AuthRepository {
       throw new Error('Error finding user by email');
     }
   }
-  static async findUserById(userId: number) {
+  static async findUserById(userId: string) {
     try {
       const user = await prisma.user.findFirst({
         where: {
@@ -53,12 +53,12 @@ class AuthRepository {
     }
   }
 
-  static async deleteCode(userId: number) { 
+  static async deleteCode(userId: string) { 
     await prisma.passwordReset.deleteMany({
       where: { userId },
     });
   }
-  static async createPasswordReset(userId: number, resetToken: string, expiresAt: Date) {
+  static async createPasswordReset(userId: string, resetToken: string, expiresAt: Date) {
     // Hapus record lama untuk user ini jika ada
     await prisma.passwordReset.deleteMany({
       where: { userId },
@@ -86,7 +86,7 @@ class AuthRepository {
   }
 
   // Update user password
-  static async updatePassword(userId: number, newPassword: string) {
+  static async updatePassword(userId: string, newPassword: string) {
     try {
       const updatedUser = await prisma.user.update({
         where: {
@@ -112,7 +112,7 @@ class AuthRepository {
     });
   }
     
-  static async storeResetTokenInUser(userId: number, resetToken: string, resetTokenExpiry: Date) {
+  static async storeResetTokenInUser(userId: string, resetToken: string, resetTokenExpiry: Date) {
     return prisma.user.update({
       where: { id: userId },
       data: {

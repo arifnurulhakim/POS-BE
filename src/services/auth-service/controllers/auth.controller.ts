@@ -34,7 +34,7 @@ export const register: RequestHandler = async (req: Request, res: Response): Pro
         message: 'Validation error',
         errors: parsed.error.errors,
       });
-      return;
+      
     }
 
     const { name, email, password } = req.body;
@@ -73,7 +73,7 @@ export const login: RequestHandler = async (req: Request, res: Response): Promis
         message: 'Validation error',
         errors: parsed.error.errors,
       });
-      return;
+      
     }
 
     const { email, password } = req.body;
@@ -86,18 +86,16 @@ export const login: RequestHandler = async (req: Request, res: Response): Promis
         status: 'error',
         message: 'Invalid credentials'
       });
-      return;
-    }
-
-    // Verifikasi password yang dimasukkan
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      
+    } else { 
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
       res.status(400).json({
         status: 'error',
         message: 'Invalid credentials'
       });
-      return;
+      
     }
 
     // Buat token JWT
@@ -115,6 +113,10 @@ export const login: RequestHandler = async (req: Request, res: Response): Promis
       },
      
     });
+    }
+
+    // Verifikasi password yang dimasukkan
+    
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -142,11 +144,9 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
         status: 'error',
         message: 'User not found'
       });
-      return;
-    }
-
-    // Generate reset code 6 digit
-    const resetToken = generateResetCode();
+      
+    } else { 
+      const resetToken = generateResetCode();
 
 
     // Set expired dalam 1 jam
@@ -163,6 +163,10 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       status:'success',
       message: 'Reset code has been sent to your email'
     });
+    }
+
+    // Generate reset code 6 digit
+    
   } catch (error) {
     console.error('Forgot Password Error:', error);
     res.status(500).json({
@@ -184,7 +188,7 @@ export const resetPassword: RequestHandler = async (req: Request, res: Response)
         message: 'Validation error',
         errors: parsed.error.errors,
       });
-      return;
+      
     }
 
     const { code, newPassword } = req.body;
@@ -197,44 +201,49 @@ export const resetPassword: RequestHandler = async (req: Request, res: Response)
         status: 'error',
         message: 'Invalid or expired reset code'
       });
-      return;
-    }
-
-    // Verifikasi jika kode belum kadaluarsa
+      
+    } else { 
+        // Verifikasi jika kode belum kadaluarsa
     const currentTime = new Date();
     if (resetRequest.expiresAt < currentTime) {
       res.status(400).json({
         status: 'error',
         message: 'Reset code has expired'
       });
-      return;
+      
     }
     const userId = resetRequest.userId;
 
     // Cari pengguna berdasarkan userId yang terkait dengan reset code
     const user = await AuthRepository.findUserById(userId);
 
-    if (!user) {
-      res.status(404).json({
-        status: 'error',
-        message: 'User not found'
-      });
-      return;
-    }
+      if (!user) {
+        res.status(404).json({
+          status: 'error',
+          message: 'User not found'
+        });
+      
+      } else { 
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update password pengguna
+        await AuthRepository.updatePassword(user.id, hashedPassword);
+    
+        // Hapus reset code setelah berhasil mengubah password
+        await AuthRepository.deleteCode(user.id);
+        res.status(200).json({
+          status:'success',
+          message: 'Password updated successfully'
+        });
+      }
 
     // Hash password baru
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+   
 
-    // Update password pengguna
-    await AuthRepository.updatePassword(user.id, hashedPassword);
+   
+    }
 
-    // Hapus reset code setelah berhasil mengubah password
-    await AuthRepository.deleteCode(user.id);
-
-    res.status(200).json({
-      status:'success',
-      message: 'Password updated successfully'
-    });
+  
   } catch (error) {
     res.status(500).json({
       status: 'error',
@@ -245,28 +254,27 @@ export const resetPassword: RequestHandler = async (req: Request, res: Response)
 // Logout User
 export const logout: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({
-      status: 'error',
-      message: 'No token provided'
-    });
-    return;
-  }
-
-  const token = authHeader.split(' ')[1];
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({
+        status: 'error',
+        message: 'No token provided'
+      });
+      
+    } else { 
+      const token = authHeader.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
 
-    // Kalau mau simpan blacklist token, bisa di sini
-    // Misal: BlacklistRepository.add(token)
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Logged out successfully'
-    });
-    return;
+      // Kalau mau simpan blacklist token, bisa di sini
+      // Misal: BlacklistRepository.add(token)
+  
+      res.status(200).json({
+        status: 'success',
+        message: 'Logged out successfully'
+      });
+    }
+   
+    
   } catch (error) {
     res.status(401).json({
       status: 'error',
