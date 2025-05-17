@@ -140,13 +140,25 @@ export const notifMidtrans = async (req: Request, res: Response): Promise<void> 
     } = req.body;
 
     const serverKey = process.env.MIDTRANS_SERVER_KEY || '';
-    const expectedSignature = crypto
-      .createHash('sha512')
-      .update(order_id + status_code + gross_amount + serverKey)
-      .digest('hex');
-    
+    // const expectedSignature = crypto
+    //   .createHash('sha512')
+    //   .update(order_id + status_code + gross_amount + serverKey)
+    //   .digest('hex');
+    const generateSignatureKey = (
+      order_id: string,
+      status_code: string,
+      gross_amount: string,
+      serverKey: string
+    ): string => {
+      const input = order_id + status_code + gross_amount + serverKey;
+      const hash = crypto.createHash("sha512").update(input).digest("hex");
+      return hash;
+    };
 
-    // SHA512(order_id+status_code+gross_amount+ServerKey)
+    const expectedSignature = generateSignatureKey(order_id, status_code, gross_amount, serverKey);
+
+
+    // const expectedSignature = SHA512(order_id + status_code + gross_amount + ServerKey);
 
     // const expectedSignature = 123123;
 
