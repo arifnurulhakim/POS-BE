@@ -1,6 +1,6 @@
 // import { PrismaClient } from '@prisma/client';
 // import { PrismaClient, transactions_status } from '../../../generated/prisma';
-import { nanoid } from 'nanoid';
+// import { nanoid } from 'nanoid';
 import { PENDING_PAYMENT } from '../utils/transaction.utils';
 // import { enumUtil } from 'zod/lib/helpers/enumUtil';
 
@@ -95,7 +95,7 @@ class transactionRepository {
   }>) {
     try {
       const items = products.map(product => ({
-        id: `TRX-ITEM-${nanoid(10)}`,
+        // id: `TRX-ITEM-${nanoid(10)}`,
         transaction_id,
         product_id: product.id,
         product_name: product.name,
