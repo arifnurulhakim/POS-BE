@@ -1,9 +1,4 @@
-import { PrismaClient } from '../../../generated/prisma';
-// import { PrismaClient } from '@prisma/client';
-// import bcrypt from 'bcryptjs';
-// import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
+import prisma from '../../../prisma/client';
 
 class ProductRepository {
   // Get all products

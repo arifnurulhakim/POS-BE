@@ -1,17 +1,6 @@
-// import { User } from '../models/user.model'; // Import model User (asumsi Anda sudah membuat model)
-// import { PrismaClient } from '@prisma/client'; // Gunakan Prisma Client jika Anda menggunakan Prisma, bisa diganti dengan ORM atau DB client lain yang Anda pakai
 
-// const prisma = new PrismaClient(); // Prisma Client untuk akses DB
-
-// import { PrismaClient } from '../../../prisma/client';
-// import { PrismaClient } from '../generated';  // Path ini harus disesuaikan dengan struktur folder Anda
-
-// const prisma = new PrismaClient();
-import { PrismaClient } from '../../../generated/prisma';
-// import bcrypt from 'bcryptjs';
-// import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
+import prisma from '../../../prisma/client';
+// const prisma = new prisma;
 class AuthRepository {
   // Find user by email
   static async findUserByEmail(email: string) {

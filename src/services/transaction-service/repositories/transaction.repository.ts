@@ -1,10 +1,11 @@
 // import { PrismaClient } from '@prisma/client';
-import { PrismaClient, transactions_status } from '../../../generated/prisma';
+// import { PrismaClient, transactions_status } from '../../../generated/prisma';
 import { nanoid } from 'nanoid';
 import { PENDING_PAYMENT } from '../utils/transaction.utils';
-import { enumUtil } from 'zod/lib/helpers/enumUtil';
+// import { enumUtil } from 'zod/lib/helpers/enumUtil';
 
-const prisma = new PrismaClient();
+import prisma from '../../../prisma/client';
+import type { transactions_status } from '@prisma/client';
 
 class transactionRepository {
   // Create new transaction
