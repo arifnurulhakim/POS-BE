@@ -139,13 +139,16 @@ export const notifMidtrans = async (req: Request, res: Response): Promise<void> 
       payment_type,
     } = req.body;
 
-    // const serverKey = process.env.MIDTRANS_SERVER_KEY || '';
-    // const expectedSignature = crypto
-    //   .createHash('sha512')
-    //   .update(order_id + status_code + gross_amount + serverKey)
-    //   .digest('hex');
+    const serverKey = process.env.MIDTRANS_SERVER_KEY || '';
+    const expectedSignature = crypto
+      .createHash('sha512')
+      .update(order_id + status_code + gross_amount + serverKey)
+      .digest('hex');
+    
 
-    const expectedSignature = 123123;
+    // SHA512(order_id+status_code+gross_amount+ServerKey)
+
+    // const expectedSignature = 123123;
 
     // Validate signature
     if (signature_key !== expectedSignature) {
