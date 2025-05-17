@@ -1,4 +1,3 @@
-// src/services/auth-service/middlewares/auth.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
@@ -10,7 +9,10 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    req.user = decoded;
+
+    // *Type assertion* supaya TypeScript gak error
+    (req as any).user = decoded;
+
     next();
   } catch (error) {
     return res.status(400).json({ message: 'Invalid token' });
