@@ -1,19 +1,7 @@
 import app from "./app";
 
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || "3000", 10);
 
-const startServer = async () => {
-  try {
-    // Nonaktifkan MongoDB connection
-    // await connectMongo();
-
-    app.listen(PORT, () => {
-      console.log(`🚀 Server ready at http://localhost:${PORT}`);
-    });
-  } catch (err) {
-    console.error("❌ Error starting server:", err);
-    process.exit(1);
-  }
-};
-
-startServer();
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});
