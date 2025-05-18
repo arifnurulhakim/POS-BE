@@ -1,5 +1,15 @@
 import { Request, Response } from 'express';
 import ProductRepository from '../repositories/product.repository';
+import path from 'path';
+import fs from 'fs';
+
+import { Multer } from "multer";
+
+// Tambahkan typing agar req.file dikenali
+interface MulterRequest extends Request {
+  file: Express.Multer.File;
+}
+
 
 export const getAllProducts = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -70,44 +80,58 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
   }
 };
 
+
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, description, price, stock, image_url } = req.body;
+    const file = req.file;
+    const { name, description, price, stock } = req.body;
 
+    // Validasi input
     if (!name || name.trim().length < 3) {
       res.status(400).json({
-        status: 'error',
-        message: 'Name must be at least 3 characters',
+        status: "error",
+        message: "Name must be at least 3 characters",
       });
       return;
     }
 
-    if (!price || stock < 0) {
+    const parsedPrice = Number(price);
+    const parsedStock = Number(stock);
+
+    if (isNaN(parsedPrice) || isNaN(parsedStock) || parsedPrice <= 0 || parsedStock < 0) {
       res.status(400).json({
-        status: 'error',
-        message: 'Price and stock must be provided',
+        status: "error",
+        message: "Price must be > 0 and stock must be >= 0",
       });
       return;
     }
 
+    // Path image
+    let image_url = "";
+    if (file) {
+      // Simpan path relatif dari public root (bukan src/)
+      image_url = path.join("storage/product", file.filename).replace(/\\/g, "/");
+    }
+
+    // Simpan ke DB
     const product = await ProductRepository.createProduct({
-      name,
+      name: name.trim(),
       description,
-      price,
-      stock,
+      price: parsedPrice,
+      stock: parsedStock,
       image_url,
     });
 
     res.status(201).json({
-      status: 'success',
-      message: 'Product created successfully',
+      status: "success",
+      message: "Product created successfully",
       data: product,
     });
   } catch (error) {
+    console.error("Create Product Error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Error creating product',
-      error,
+      status: "error",
+      message: "Error creating product",
     });
   }
 };
@@ -115,36 +139,66 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { name, description, price, stock, image_url } = req.body;
+    const { name, description, price, stock } = req.body;
+    const file = req.file;
 
-    const product = await ProductRepository.findById(id);
-
-    if (!product) {
+    // Cari data produk lama
+    const existingProduct = await ProductRepository.findById(id);
+    if (!existingProduct) {
       res.status(404).json({
-        status: 'error',
-        message: 'Product not found',
+        status: "error",
+        message: "Product not found",
       });
       return;
     }
 
-    const updated = await ProductRepository.updateProduct(id, {
-      name,
-      description,
-      price,
-      stock,
+    // Validasi input
+    if (name && name.trim().length < 3) {
+      res.status(400).json({
+        status: "error",
+        message: "Name must be at least 3 characters",
+      });
+      return;
+    }
+
+    const parsedPrice = price !== undefined ? Number(price) : existingProduct.price;
+    const parsedStock = stock !== undefined ? Number(stock) : existingProduct.stock;
+
+    if (
+      (price !== undefined && (isNaN(parsedPrice) || parsedPrice <= 0)) ||
+      (stock !== undefined && (isNaN(parsedStock) || parsedStock < 0))
+    ) {
+      res.status(400).json({
+        status: "error",
+        message: "Price must be > 0 and stock must be >= 0",
+      });
+      return;
+    }
+
+    // Tangani file baru jika ada
+    let image_url = existingProduct.image_url || "";
+    if (file) {
+      image_url = path.join("storage/product", file.filename).replace(/\\/g, "/");
+    }
+
+    const updatedProduct = await ProductRepository.updateProduct(id, {
+      name: name?.trim() ?? existingProduct.name,
+      description: description ?? existingProduct.description,
+      price: parsedPrice,
+      stock: parsedStock,
       image_url,
     });
 
     res.status(200).json({
-      status: 'success',
-      message: 'Product updated successfully',
-      data: updated,
+      status: "success",
+      message: "Product updated successfully",
+      data: updatedProduct,
     });
   } catch (error) {
+    console.error("Update Product Error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Error updating product',
-      error,
+      status: "error",
+      message: "Error updating product",
     });
   }
 };

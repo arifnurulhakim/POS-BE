@@ -1,15 +1,29 @@
-// src/routes/productRoutes.ts
 import express from 'express';
-import { productMiddleware } from '../middlewares/product.middleware'; // Middleware untuk autentikasi
+import { productMiddleware } from '../middlewares/product.middleware';
+import { upload } from '../middlewares/upload.middleware';
 import * as ProductController from '../controllers/product.controller';
 
 const router = express.Router();
 
-// Menambahkan middleware 'productMiddleware' pada rute yang membutuhkan autentikasi
-router.get('/list', productMiddleware, ProductController.getAllProducts); // Melindungi rute GET /products
-router.get('/show/:id', productMiddleware, ProductController.getProductById); // Melindungi rute GET /products
-router.post('/create', productMiddleware, ProductController.createProduct); // Melindungi rute POST /products
-router.put('/update/:id', productMiddleware, ProductController.updateProduct); // Melindungi rute PUT /products/:id
-router.delete('/delete/:id', productMiddleware, ProductController.deleteProduct); // Melindungi rute DELETE /products/:id
+// Rute produk dengan autentikasi dan (jika perlu) upload file
+router.get('/list', productMiddleware, ProductController.getAllProducts);
+router.get('/show/:id', productMiddleware, ProductController.getProductById);
+
+// Gunakan upload.single('image') untuk rute yang menerima file gambar
+router.post(
+  '/create',
+  productMiddleware,
+  upload.single('image'), // `image` = nama field pada form
+  ProductController.createProduct
+);
+
+router.put(
+  '/update/:id',
+  productMiddleware,
+  upload.single('image'), // memungkinkan update dengan file baru
+  ProductController.updateProduct
+);
+
+router.delete('/delete/:id', productMiddleware, ProductController.deleteProduct);
 
 export default router;
