@@ -106,17 +106,19 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Path image
+    // Handle image url (jika pakai Cloudinary, ganti dengan file.path atau file.url)
     let image_url = "";
     if (file) {
-      // Simpan path relatif dari public root (bukan src/)
-      image_url = path.join("storage/product", file.filename).replace(/\\/g, "/");
+      // Jika lokal
+      // image_url = path.join("storage/product", file.filename).replace(/\\/g, "/");
+      // Jika pakai Cloudinary, biasanya jadi:
+      image_url = (file as any).path || "";
     }
 
     // Simpan ke DB
     const product = await ProductRepository.createProduct({
       name: name.trim(),
-      description,
+      description: description?.trim() ?? "",
       price: parsedPrice,
       stock: parsedStock,
       image_url,
@@ -128,7 +130,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       data: product,
     });
   } catch (error) {
-    console.error("Create Product Error:", error);
+    console.error("Create Product Error:", error instanceof Error ? error.message : error);
     res.status(500).json({
       status: "error",
       message: "Error creating product",
@@ -175,15 +177,17 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Tangani file baru jika ada
+    // Handle file baru jika ada
     let image_url = existingProduct.image_url || "";
     if (file) {
-      image_url = path.join("storage/product", file.filename).replace(/\\/g, "/");
+      // image_url = path.join("storage/product", file.filename).replace(/\\/g, "/");
+      // Jika pakai Cloudinary:
+      image_url = (file as any).path || "";
     }
 
     const updatedProduct = await ProductRepository.updateProduct(id, {
       name: name?.trim() ?? existingProduct.name,
-      description: description ?? existingProduct.description,
+      description: description?.trim() ?? existingProduct.description,
       price: parsedPrice,
       stock: parsedStock,
       image_url,
@@ -195,7 +199,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       data: updatedProduct,
     });
   } catch (error) {
-    console.error("Update Product Error:", error);
+    console.error("Update Product Error:", error instanceof Error ? error.message : error);
     res.status(500).json({
       status: "error",
       message: "Error updating product",
