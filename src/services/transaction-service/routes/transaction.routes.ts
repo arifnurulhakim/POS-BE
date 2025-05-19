@@ -8,7 +8,7 @@ const router = express.Router();
 // Menambahkan middleware 'transactionMiddleware' pada rute yang membutuhkan autentikasi
 router.get('/list',  TransactionController.getTransactions); // Melindungi rute GET /transactions
 router.get('/show/:id',  TransactionController.getTransactionById); // Melindungi rute GET /transactions
-router.get('/email',  TransactionController.getTransactionByEmail); // Melindungi rute GET /transactions
+router.get('/email/:email',  TransactionController.getTransactionByEmail); // Melindungi rute GET /transactions
 router.post('/create',  TransactionController.createTransaction); // Melindungi rute POST /transactions
 router.post('/notif',  TransactionController.notifMidtrans); // Melindungi rute POST /transactions
 // router.put('/update/:id',  TransactionController.updateTransaction); // Melindungi rute PUT /transactions/:id
