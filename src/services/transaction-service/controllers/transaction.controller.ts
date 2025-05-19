@@ -125,36 +125,37 @@ export const getTransactionById = async (req: Request, res: Response): Promise<v
     });
   }
 };
-export const getTransactionByEmail = async (req: Request, res: Response): Promise<void> => {
+export const getTransactionsByEmail = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email } = req.params;
 
-    if (!email) {
+    if (!email || typeof email !== 'string') {
       res.status(400).json({
         status: 'error',
         message: 'Email is required and must be a string',
       });
+      return;
     }
 
-    const transaction = await transactionRepository.findByEmail(email);
+    const transactions = await transactionRepository.findByEmail(email);
 
-    if (!transaction) {
+    if (!transactions || transactions.length === 0) {
       res.status(404).json({
         status: 'error',
-        message: 'No transaction found for this email',
+        message: 'No transactions found for this email',
       });
       return;
     }
 
-    res.json({
+    res.status(200).json({
       status: 'success',
-      data: reformTransaction(transaction),
+      data: transactions.map(reformTransaction),
     });
   } catch (error) {
-    console.error('Get Transaction By Email Error:', error);
+    console.error('Get Transactions By Email Error:', error);
     res.status(500).json({
       status: 'error',
-      message: 'Failed to fetch transaction',
+      message: 'Failed to fetch transactions',
     });
   }
 };

@@ -176,9 +176,9 @@ class transactionRepository {
   static async findByEmail(email: string) {
     try {
       if (!email) {
-        throw new Error('email is required');
+        throw new Error('Email is required');
       }
-  
+
       return await prisma.transaction.findMany({
         where: { customer_email: email },
         include: {
@@ -195,12 +195,15 @@ class transactionRepository {
             },
           },
         },
+        orderBy: {
+          created_at: 'desc',
+        },
       });
     } catch (error) {
-      console.error('Error fetching transaction by email:', error);
-      throw new Error('Error fetching transaction by email');
+      console.error('Error fetching transactions by email:', error);
+      throw new Error('Error fetching transactions by email');
     }
-  }
+  };
   // Update transaction status (and optional payment method)
   static async updateStatus(transaction_id: string, status: transactions_status, payment_method?: string | null) {
     try {
