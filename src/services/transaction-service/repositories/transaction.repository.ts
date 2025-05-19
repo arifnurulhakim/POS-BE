@@ -173,7 +173,32 @@ class transactionRepository {
       throw new Error('Error fetching transaction by ID');
     }
   }
-
+  static async findByEmail(email: string) {
+    try {
+      if (!email) throw new Error('email is required');
+  
+      return await prisma.transaction.findMany({
+        where: { customer_email: email },
+        include: {
+          transactions_items: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  price: true,
+                  image_url: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching transactions by email:', error);
+      throw new Error('Error fetching transactions by email');
+    }
+  }
   // Update transaction status (and optional payment method)
   static async updateStatus(transaction_id: string, status: transactions_status, payment_method?: string | null) {
     try {

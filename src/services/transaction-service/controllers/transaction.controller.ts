@@ -49,7 +49,6 @@ export const createTransaction = async (req: Request, res: Response): Promise<vo
     });
 
     await transactionRepository.createTransactionItems(transaction.id, productsFromDB );
-
       res.status(201).json({
       status: 'success',
       data: {
@@ -70,8 +69,6 @@ export const createTransaction = async (req: Request, res: Response): Promise<vo
     });
   }
 };
-
-
 // Get all transactions (optional filter by status)
 export const getTransactions = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -91,7 +88,8 @@ export const getTransactions = async (req: Request, res: Response): Promise<void
         message: 'Failed to fetch transactions',
       });
     }
-  };
+};
+
 // Get transaction by ID
 export const getTransactionById = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -121,6 +119,40 @@ export const getTransactionById = async (req: Request, res: Response): Promise<v
     });
   } catch (error) {
     console.error('Get Transaction By ID Error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch transaction',
+    });
+  }
+};
+export const getTransactionByEmail = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.query;
+
+    if (!email || typeof email !== 'string') {
+      res.status(400).json({
+        status: 'error',
+        message: 'Email is required and must be a string',
+      });
+      return;
+    }
+
+    const transaction = await transactionRepository.findByEmail(email);
+
+    if (!transaction) {
+      res.status(404).json({
+        status: 'error',
+        message: 'No transaction found for this email',
+      });
+      return;
+    }
+
+    res.json({
+      status: 'success',
+      data: reformTransaction(transaction),
+    });
+  } catch (error) {
+    console.error('Get Transaction By Email Error:', error);
     res.status(500).json({
       status: 'error',
       message: 'Failed to fetch transaction',
