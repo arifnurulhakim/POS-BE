@@ -127,14 +127,13 @@ export const getTransactionById = async (req: Request, res: Response): Promise<v
 };
 export const getTransactionByEmail = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email } = req.query;
+    const { email } = req.params;
 
-    if (!email || typeof email !== 'string') {
+    if (!email) {
       res.status(400).json({
         status: 'error',
         message: 'Email is required and must be a string',
       });
-      return;
     }
 
     const transaction = await transactionRepository.findByEmail(email);
